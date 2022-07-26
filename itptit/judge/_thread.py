@@ -101,12 +101,14 @@ class TestCaseManager(Thread):
         judge,
         time_limit,
         solution_path,
+        actualoutput_dir,
         testcase_queue: SynAssets,
     ):
         self.judge = judge
         self.stdcursor = self.judge.stdcursor
         self.time_limit = time_limit
         self.solution_path = solution_path
+        self.actualoutput_dir = actualoutput_dir
         self.testcase_queue = testcase_queue
         self.judge_result = None
         self.runner = None
@@ -188,6 +190,9 @@ class TestCaseManager(Thread):
                 self.judge_result.result = 'TLE'
             if self.judge_result.output is not None:
                 self._check_result()
+                if self.actualoutput_dir is not None:
+                    with open(f'{self.actualoutput_dir}/{self.testcase_info.testname}.txt', 'w', encoding='utf-8') as actualoutput_file:
+                        actualoutput_file.write(self.judge_result.output)
             self._report_result()
 
     def _check_result(self):
