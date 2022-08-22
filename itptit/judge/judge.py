@@ -40,6 +40,7 @@ from ._common import (
 )
 from platform import system as osname
 
+
 class _DEFAULT:
     TIME_LIMIT = None
     INPUT_EXTENSION = 'in'
@@ -74,7 +75,7 @@ class _BaseJudge:
         self.actualout_dir = actualout_dir
         self.language = solution_path[solution_path.rfind('.') + 1:]
         # Compile
-        if self.language == 'cpp':
+        if self.language in ('c', 'cpp'):
             if system('g++ ./' + solution_path + ' -o ./judgingprocess'):
                 raise CompileError(f'Failed to compile "{solution_path}".')
 
@@ -114,15 +115,18 @@ class _BaseJudge:
         print(_format.formating(f'  > Result: ',
               _format.BOLD, _format.CYAN) + result)
 
-        if self.language == 'cpp':
+        if self.language in ('c', 'cpp'):
             if osname() == 'Linux':
-                systemrun('killall -KILL judgingprocess', stdout=DEVNULL, stderr=DEVNULL)
+                systemrun('killall -KILL judgingprocess',
+                          stdout=DEVNULL, stderr=DEVNULL)
                 remove('judgingprocess')
             elif osname() == 'Darwin':
-                systemrun('sudo killall -9 \'judgingprocess\'', stdout=DEVNULL, stderr=DEVNULL)
+                systemrun('sudo killall -9 \'judgingprocess\'',
+                          stdout=DEVNULL, stderr=DEVNULL)
                 remove('judgingprocess')
             elif osname() == 'Windows':
-                systemrun('taskkill /F /IM judgingprocess.exe', stdout=DEVNULL, stderr=DEVNULL)
+                systemrun('taskkill /F /IM judgingprocess.exe',
+                          stdout=DEVNULL, stderr=DEVNULL)
                 remove('judgingprocess.exe')
 
 
@@ -136,9 +140,10 @@ class SingleJudge(_BaseJudge):
         actual_output_file_path=None
     ):
         if self.language == 'py':
-            command = f'python {self.solution_path} < {testcase_info.input_file_path}'
-        elif self.language == 'cpp':
-            command = f'judgingprocess < {testcase_info.input_file_path}'
+            pyrun = 'py' if osname() == 'Windows' else 'python3'
+            command = f'{pyrun} {self.solution_path} < {testcase_info.input_file_path}'
+        elif self.language in ('c', 'cpp'):
+            command = f'./judgingprocess < {testcase_info.input_file_path}'
         if osname() == 'Windows':
             command = f'cmd /c "{command}'
         self.judge_result = JudgeResult(testcase_info)
@@ -155,7 +160,7 @@ class SingleJudge(_BaseJudge):
             self.language == 'py' and self.judge_result.output.startswith(
                 'Traceback')
             or
-            self.language == 'cpp' and 'terminate called after throwing' in self.judge_result.output
+            self.language in ('c', 'cpp') and 'terminate called after throwing' in self.judge_result.output
         ):
             raise InvalidReturn()
 
@@ -229,7 +234,7 @@ class MultiJudge(_BaseJudge):
         self.stdcursor.lock.release()
         self.testsuite.assets = self.testsuite.assets[::-1]
 
-        judges = [TestCaseManager(self, self.time_limit, self.solution_path,
+        judges = [TestCaseManager(self, self.time_limit, self.solution_path, self.actualout_dir,
                                   self.testsuite) for _ in range(self.number_of_judges)]
 
         for judge in judges:

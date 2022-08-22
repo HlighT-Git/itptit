@@ -150,9 +150,6 @@ class TestCaseFamily:
 
 
 class _BaseGenerator(ABC):
-    '''
-    # DON'T USE THIS!
-    '''
     _static_write_mode: int = ...
     _default_write_mode: int = ...
 

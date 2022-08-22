@@ -129,9 +129,10 @@ class TestCaseManager(Thread):
         self.language = self.solution_path[self.solution_path.rfind('.') + 1:]
 
         if self.language == 'py':
-            command = f'python {self.solution_path} < {testcase_info.input_file_path}'
-        elif self.language == 'cpp':
-            command = f'judgingprocess < {testcase_info.input_file_path}'
+            pyrun = 'py' if osname() == 'Windows' else 'python3'
+            command = f'{pyrun} {self.solution_path} < {testcase_info.input_file_path}'
+        elif self.language in ('c', 'cpp'):
+            command = f'./judgingprocess < {testcase_info.input_file_path}'
         if osname() == 'Windows':
             command = f'cmd /c "{command}'
         if self.judge_result is not None:
@@ -165,7 +166,7 @@ class TestCaseManager(Thread):
             self.language == 'py' and self.judge_result.output.startswith(
                 'Traceback')
             or
-            self.language == 'cpp' and 'terminate called after throwing' in self.judge_result.output
+            self.language in ('c', 'cpp') and 'terminate called after throwing' in self.judge_result.output
         ):
             raise InvalidReturn()
 

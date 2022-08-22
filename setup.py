@@ -1,13 +1,14 @@
 from setuptools import setup
-
-VERSION = '1.0.1'
+# py setup.py bdist_wheel
+# twine upload dist/*
+VERSION = '1.0.2'
 AUTHOR = 'Hlight'
 DESCRIPTION = 'Python library of IT Club PTIT HN'
 
 setup(
     name='itptit',
     version=VERSION,
-    url='https://github.com/HlighT-Git/itptit',
+    url='https://github.com/hlighT-git/itptit',
     license='MIT',
     author=AUTHOR,
     author_email='hlight.mail@gmail.com',

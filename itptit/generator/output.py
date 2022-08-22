@@ -67,8 +67,9 @@ class Generator(_BaseGenerator):
         language: str
     ) -> str:
         if language == 'py':
-            command = 'python ' + solution_path + ' < ' + input_path
-        elif language == 'cpp':
+            pyrun = 'py' if osname() == 'Windows' else 'python3'
+            command = f'{pyrun} {solution_path} < {input_path}'
+        elif language in ('c', 'cpp'):
             command = 'solution < ' + input_path
         if osname() == 'Windows':
             command = f'cmd /c "{command}'
@@ -94,7 +95,7 @@ class Generator(_BaseGenerator):
         failed = False
         wrong_file_extension = True
         language = solution_path[solution_path.rfind('.') + 1:]
-        if language == 'cpp':
+        if language in ('c', 'cpp'):
             if system('g++ ./' + solution_path + ' -o ./solution'):
                 raise CompileError(f'Failed to compile "{solution_path}".')
         warm_up = False
@@ -126,13 +127,13 @@ class Generator(_BaseGenerator):
             if 'Fail' in res:
                 failed = True
             print(res)
-        if language == 'cpp':
+        if language in ('c', 'cpp'):
             if osname() == 'Linux':
-                remove('solution')
+                remove('./solution')
             elif osname() == 'Darwin':
-                remove('solution')
+                remove('./solution')
             elif osname() == 'Windows':
-                remove('solution.exe')
+                remove('./solution.exe')
         if wrong_file_extension:
             raise WrongFileExtensionException(input_file_extension)
         if failed:
